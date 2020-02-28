@@ -6,7 +6,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "publish": "yarn run lint && yarn run build && npm publish"
   },
   "repository": "https://github.com/ququzone/ckb-cache-js",
   "keywords": [
