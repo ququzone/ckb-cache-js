@@ -1,10 +1,11 @@
 {
   "name": "ckb-cache-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A CKB cell ceche.",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run clean && tsc",
     "watch": "tsc -w",
+    "clean": "rm -rf lib types",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "jest --coverage"
   },
