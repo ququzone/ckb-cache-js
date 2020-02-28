@@ -4,13 +4,13 @@ import { Metadata } from "./entity/metadata";
 export default class MetadataRepository {
   private repository = getRepository(Metadata);
 
-  async findCurrentBlock(): Promise<string> {
+  public async findCurrentBlock(): Promise<string> {
     const currentBlock = await this.repository.findOne({name: "current_block"});
 
     if (currentBlock == null) {
       await this.repository.save({
         name: "current_block",
-        value: "1"
+        value: "1",
       });
       return "1";
     }
@@ -18,14 +18,14 @@ export default class MetadataRepository {
     return currentBlock.value;
   }
 
-  async updateCurrentBlock(block: string): Promise<void> {
+  public async updateCurrentBlock(block: string): Promise<void> {
     let currentBlock = await this.repository.findOne({name: "current_block"});
 
     if (currentBlock == null) {
       currentBlock = {
         id: null,
         name: "current_block",
-        value: block
+        value: block,
       };
     } else {
       currentBlock.value = block;

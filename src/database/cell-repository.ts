@@ -4,7 +4,7 @@ import { Cell } from "./entity/cell";
 export default class CellRepository {
   private repository = getRepository(Cell);
 
-  async save(cell: Cell) {
+  public async save(cell: Cell) {
     const exists = await this.repository.findOne({txHash: cell.txHash, index: cell.index});
 
     if (!exists) {
@@ -12,33 +12,34 @@ export default class CellRepository {
     }
   }
 
-  async remove(id: number) {
-    await this.repository.delete({id: id});
+  public async remove(id: number) {
+    await this.repository.delete({id});
   }
 
-  async updateUsed(status: string, txHash: string, blockNumber: string, previousTxHash: string, previousIndex: string) {
+  public async updateUsed(status: string, txHash: string, blockNumber: string,
+                          previousTxHash: string, previousIndex: string) {
     await this.repository.update(
       {txHash: previousTxHash, index: previousIndex},
-      {status: status, usedTxHash: txHash, usedBlockNumber: blockNumber}
+      {status, usedTxHash: txHash, usedBlockNumber: blockNumber},
     );
   }
 
-  async updateStatus(id: number, oldStatus: string, newStatus: string) {
+  public async updateStatus(id: number, oldStatus: string, newStatus: string) {
     await this.repository.update(
-      {id: id, status: oldStatus},
-      {status: newStatus}
+      {id, status: oldStatus},
+      {status: newStatus},
     );
   }
 
-  async findByStatus(status: string): Promise<Cell[]> {
-    return await this.repository.find({status: status});
+  public async findByStatus(status: string): Promise<Cell[]> {
+    return await this.repository.find({status});
   }
 
-  async clear() {
+  public async clear() {
     await this.repository.delete({});
   }
 
-  async find(query: any): Promise<Cell[]> {
+  public async find(query: any): Promise<Cell[]> {
     const selectBuilder = this.repository.createQueryBuilder().where("(status = 'normal' or status = 'pending')");
     if (query.lockHash) {
       if (query.lockHash === "null") {

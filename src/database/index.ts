@@ -13,6 +13,7 @@ export const initConnection = async (options: any) => {
     await getConnection().manager.query("PRAGMA busy_timeout = 3000;");
     await getConnection().manager.query("PRAGMA temp_store = MEMORY;");
   } catch (err) {
+    // tslint:disable-next-line:no-console
     console.error(err.message);
   }
 };

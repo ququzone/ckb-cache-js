@@ -1,67 +1,67 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
 export class Cell {
   @PrimaryGeneratedColumn()
-  id: number;
+  public id: number;
 
   @Column()
-  txHash: string;
+  public txHash: string;
 
   @Column()
-  createdBlockNumber: string;
+  public createdBlockNumber: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
-  usedBlockNumber: string;
+  public usedBlockNumber: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
-  usedTxHash: string;
+  public usedTxHash: string;
 
   @Column()
-  status: string;
+  public status: string;
 
   @Column()
-  index: string;
+  public index: string;
 
   @Column()
-  capacity: string
+  public capacity: string;
 
   @Column()
-  lockHash: string;
+  public lockHash: string;
 
   @Column()
-  lockHashType: string;
+  public lockHashType: string;
 
   @Column()
-  lockCodeHash: string;
+  public lockCodeHash: string;
 
   @Column()
-  lockArgs: string;
+  public lockArgs: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
-  typeHash: string;
+  public typeHash: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
-  typeHashType: string;
+  public typeHashType: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
-  typeCodeHash: string;
+  public typeCodeHash: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
-  typeArgs: string;
+  public typeArgs: string;
 
   @Column()
-  data: string;
+  public data: string;
 }
