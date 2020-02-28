@@ -1,0 +1,22 @@
+{
+  "name": "ckb-cache-js",
+  "version": "0.0.1",
+  "description": "A CKB cell ceche.",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint -c tslint.json -p tsconfig.json"
+  },
+  "repository": "https://github.com/ququzone/ckb-cache-js",
+  "keywords": [
+    "Nervos",
+    "CKB",
+    "cache"
+  ],
+  "author": "ququzone <xueping.yang@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tslint": "^5.19.0",
+    "typescript": "^3.7.5"
+  }
+}
