@@ -1,7 +1,7 @@
 ckb-cache-js
 ============
 
-> A embleddable CKB live cells ceche.
+> A embeddable CKB live cells ceche.
 
 ## Install
 
