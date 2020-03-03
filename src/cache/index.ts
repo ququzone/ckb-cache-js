@@ -1,6 +1,6 @@
 // tslint:disable:variable-name
 import CKB from "@nervosnetwork/ckb-sdk-core";
-import BN = require("bn.js");
+import BN from "bn.js";
 import CellRepository from "../database/cell-repository";
 import { Cell } from "../database/entity/cell";
 import { Rule } from "../database/entity/rule";
