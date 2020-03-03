@@ -1,6 +1,6 @@
 import CKB from "@nervosnetwork/ckb-sdk-core";
 import * as utils from "@nervosnetwork/ckb-sdk-utils";
-import * as BN from "bn.js";
+import BN = require("bn.js");
 import CellRepository from "../database/cell-repository";
 import { Cell } from "../database/entity/cell";
 import { Rule } from "../database/entity/rule";
