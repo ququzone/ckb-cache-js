@@ -1,7 +1,7 @@
 {
   "name": "ckb-cache-js",
   "version": "0.0.3",
-  "description": "A embeddable CKB live cells ceche.",
+  "description": "A embeddable CKB live cells cache.",
   "scripts": {
     "build": "npm run clean && tsc",
     "watch": "tsc -w",
