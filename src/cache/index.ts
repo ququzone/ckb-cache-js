@@ -85,8 +85,8 @@ export class QueryBuilder {
     return this;
   }
 
-  public setCapacity(capacity: BN): QueryBuilder {
-    this._capacity = capacity;
+  public setCapacity(capacity: string): QueryBuilder {
+    this._capacity = new BN(capacity, 10);
     return this;
   }
 
