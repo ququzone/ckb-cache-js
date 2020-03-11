@@ -24,6 +24,7 @@ export default class SyncService {
 
   public constructor(ckb: CKB) {
     this.ckb = ckb;
+    this.currentBlock = ZERO.clone();
     this.metadataRepository = new MetadataRepository();
     this.ruleRepository = new RuleRepository();
     this.cellReposicory = new CellRepository();
@@ -39,6 +40,10 @@ export default class SyncService {
     this.stopped = true;
     await this.cellReposicory.clear();
     this.stopped = false;
+  }
+
+  public getCurrentBlock(): BN {
+    return this.currentBlock.clone();
   }
 
   public stop() {

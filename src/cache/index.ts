@@ -134,6 +134,8 @@ export interface CacheService {
   resetStartBlockNumber(blockNumber: string): void;
 
   findCells(query: Query): Promise<QueryResult>;
+
+  getCurrentBlock(): BN;
 }
 
 export class NullCacheService implements CacheService {
@@ -156,6 +158,10 @@ export class NullCacheService implements CacheService {
   public async findCells(_query: Query): Promise<QueryResult> {
     return QueryResult.EmptyResult;
   }
+
+  public getCurrentBlock(): BN {
+    return null;
+  }
 }
 
 export class DefaultCacheService implements CacheService {
@@ -173,7 +179,7 @@ export class DefaultCacheService implements CacheService {
 
   public async addRule(rule: Rule, beginBlockNumber: string | undefined): Promise<void> {
     await this.syncService.addRule(rule);
-    if (!beginBlockNumber) {
+    if (beginBlockNumber) {
       await this.syncService.resetStartBlockNumber(beginBlockNumber);
     }
     return;
@@ -187,8 +193,8 @@ export class DefaultCacheService implements CacheService {
     return this.syncService.reset();
   }
 
-  public resetStartBlockNumber(blockNumber: string): void {
-    this.syncService.resetStartBlockNumber(blockNumber);
+  public async resetStartBlockNumber(blockNumber: string): Promise<void> {
+    return await this.syncService.resetStartBlockNumber(blockNumber);
   }
 
   public async findCells(query: Query): Promise<QueryResult> {
@@ -223,5 +229,9 @@ export class DefaultCacheService implements CacheService {
       total,
       totalCKB,
     };
+  }
+
+  public getCurrentBlock(): BN {
+    return this.syncService.getCurrentBlock();
   }
 }
