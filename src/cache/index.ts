@@ -129,8 +129,6 @@ export interface CacheService {
 
   allRules(): Promise<Rule[]>;
 
-  reset(): Promise<void>;
-
   resetStartBlockNumber(blockNumber: string): void;
 
   findCells(query: Query): Promise<QueryResult>;
@@ -145,10 +143,6 @@ export class NullCacheService implements CacheService {
 
   public async allRules(): Promise<Rule[]> {
     return [];
-  }
-
-  public async reset(): Promise<void> {
-    return;
   }
 
   public resetStartBlockNumber(_blockNumber: string): void {
@@ -187,10 +181,6 @@ export class DefaultCacheService implements CacheService {
 
   public async allRules(): Promise<Rule[]> {
     return this.syncService.allRules();
-  }
-
-  public async reset(): Promise<void> {
-    return this.syncService.reset();
   }
 
   public async resetStartBlockNumber(blockNumber: string): Promise<void> {
