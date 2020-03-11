@@ -1,6 +1,6 @@
 // tslint:disable:variable-name
 import CKB from "@nervosnetwork/ckb-sdk-core";
-import BN = require("bn.js");
+import BN from "bn.js";
 import CellRepository from "../database/cell-repository";
 import { Cell } from "../database/entity/cell";
 import { Rule } from "../database/entity/rule";
@@ -85,8 +85,8 @@ export class QueryBuilder {
     return this;
   }
 
-  public setCapacity(capacity: BN): QueryBuilder {
-    this._capacity = capacity;
+  public setCapacity(capacity: string): QueryBuilder {
+    this._capacity = new BN(capacity, 10);
     return this;
   }
 
