@@ -20,6 +20,7 @@ export default class SyncService {
   private cellReposicory: CellRepository;
   private rules: Map<string, string[]>;
   private currentBlock: BN;
+  private currentBlockN: BN;
   private stopped = false;
 
   public constructor(ckb: CKB) {
@@ -34,12 +35,6 @@ export default class SyncService {
     this.rules.set("LockHash", []);
     this.rules.set("TypeCodeHash", []);
     this.rules.set("TypeHash", []);
-  }
-
-  public async reset() {
-    this.stopped = true;
-    await this.cellReposicory.clear();
-    this.stopped = false;
   }
 
   public getCurrentBlock(): BN {
@@ -76,8 +71,9 @@ export default class SyncService {
     if (setting.lt(ZERO) || setting.gt(this.currentBlock)) {
       return;
     }
-    this.currentBlock = setting;
-    await this.metadataRepository.updateCurrentBlock(this.currentBlock.toString(10));
+    await this.yield(1000);
+    await this.metadataRepository.updateCurrentBlock(setting.toString(10));
+    this.currentBlockN = setting;
   }
 
   private async processBlock() {
@@ -105,6 +101,11 @@ export default class SyncService {
         // tslint:disable-next-line:no-console
         console.debug(`begin sync block at: ${this.currentBlock.toString(10)}`);
         while (this.currentBlock.lte(headerNumber)) {
+          if (this.currentBlockN) {
+            this.currentBlock = this.currentBlockN;
+            this.currentBlockN = null;
+            break;
+          }
           const block = await this.ckb.rpc.getBlockByNumber(`0x${this.currentBlock.toString(16)}`);
           synced = true;
           block.transactions.forEach((tx) => {
