@@ -125,7 +125,7 @@ export class QueryBuilder {
 }
 
 export interface CacheService {
-  addRule(rule: Rule): Promise<void>;
+  addRule(rule: Rule, beginBlockNumber: string | undefined): Promise<void>;
 
   allRules(): Promise<Rule[]>;
 
@@ -137,7 +137,7 @@ export interface CacheService {
 }
 
 export class NullCacheService implements CacheService {
-  public async addRule(rule: Rule): Promise<void> {
+  public async addRule(_rule: Rule, _beginBlockNumber: string | undefined): Promise<void> {
     return;
   }
 
@@ -149,11 +149,11 @@ export class NullCacheService implements CacheService {
     return;
   }
 
-  public resetStartBlockNumber(blockNumber: string): void {
+  public resetStartBlockNumber(_blockNumber: string): void {
     return;
   }
 
-  public async findCells(query: Query): Promise<QueryResult> {
+  public async findCells(_query: Query): Promise<QueryResult> {
     return QueryResult.EmptyResult;
   }
 }
@@ -171,8 +171,12 @@ export class DefaultCacheService implements CacheService {
     this.syncService.start();
   }
 
-  public async addRule(rule: Rule): Promise<void> {
-    return this.syncService.addRule(rule);
+  public async addRule(rule: Rule, beginBlockNumber: string | undefined): Promise<void> {
+    await this.syncService.addRule(rule);
+    if (!beginBlockNumber) {
+      await this.syncService.resetStartBlockNumber(beginBlockNumber);
+    }
+    return;
   }
 
   public async allRules(): Promise<Rule[]> {

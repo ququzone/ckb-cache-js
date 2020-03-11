@@ -8,6 +8,11 @@ import MetadataRepository from "../database/metadata-repository";
 import RuleRepository from "../database/rule-repository";
 import common from "../utils/common";
 
+const ZERO = new BN(0);
+const ONE = new BN(1);
+const BATCH_SIZE = new BN(100);
+const CONFIRM_SIZE = new BN(300);
+
 export default class SyncService {
   private ckb: CKB;
   private metadataRepository: MetadataRepository;
@@ -61,13 +66,21 @@ export default class SyncService {
     return this.ruleRepository.all();
   }
 
-  public resetStartBlockNumber(blockNumber: string) {
-    this.currentBlock = new BN(blockNumber, 10);
+  public async resetStartBlockNumber(blockNumber: string) {
+    const setting = new BN(blockNumber, 10);
+    if (setting.lt(ZERO) || setting.gt(this.currentBlock)) {
+      return;
+    }
+    this.currentBlock = setting;
+    await this.metadataRepository.updateCurrentBlock(this.currentBlock.toString(10));
   }
 
   private async processBlock() {
     const currentBlockS = await this.metadataRepository.findCurrentBlock();
     this.currentBlock = new BN(currentBlockS).sub(new BN(1));
+    if (this.currentBlock.lt(ZERO)) {
+      this.currentBlock = ZERO.clone();
+    }
 
     const rules = await this.ruleRepository.all();
     rules.forEach((rule: Rule) => {
@@ -80,7 +93,10 @@ export default class SyncService {
       let synced = false;
       try {
         const header = await this.ckb.rpc.getTipHeader();
-        const headerNumber = new BN(header.number.slice(2), 16);
+        let headerNumber = new BN(header.number.slice(2), 16);
+        if (headerNumber.sub(BATCH_SIZE).gt(this.currentBlock)) {
+          headerNumber = this.currentBlock.add(BATCH_SIZE);
+        }
         // tslint:disable-next-line:no-console
         console.debug(`begin sync block at: ${this.currentBlock.toString(10)}`);
         while (this.currentBlock.lte(headerNumber)) {
@@ -121,7 +137,7 @@ export default class SyncService {
             }
           });
 
-          this.currentBlock = this.currentBlock.add(new BN(1));
+          this.currentBlock.iadd(ONE);
         }
       } catch (err) {
         // tslint:disable-next-line:no-console
@@ -131,8 +147,9 @@ export default class SyncService {
           // tslint:disable-next-line:no-console
           console.debug(`sync block since: ${this.currentBlock.toString(10)}`);
           await this.metadataRepository.updateCurrentBlock(this.currentBlock.toString(10));
+        } else {
+          await this.yield(10000);
         }
-        await this.yield(10000);
       }
     }
   }
@@ -151,7 +168,7 @@ export default class SyncService {
             await this.cellReposicory.remove(cell.id);
             return;
           }
-          if (new BN(cell.createdBlockNumber).add(new BN(300)).lte(headerNumber)) {
+          if (new BN(cell.createdBlockNumber).add(CONFIRM_SIZE).lte(headerNumber)) {
             await this.cellReposicory.updateStatus(cell.id, "pending", "normal");
           }
         });
@@ -164,7 +181,7 @@ export default class SyncService {
             await this.cellReposicory.updateStatus(cell.id, "pending_dead", "pending");
             return;
           }
-          if (new BN(cell.usedBlockNumber).add(new BN(300)).lte(headerNumber)) {
+          if (new BN(cell.usedBlockNumber).add(CONFIRM_SIZE).lte(headerNumber)) {
             await this.cellReposicory.remove(cell.id);
           }
         });
