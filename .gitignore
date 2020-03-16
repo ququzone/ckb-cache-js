@@ -3,3 +3,4 @@ node_modules
 /coverage
 /database.sqlite
 /types
+/src/test.ts

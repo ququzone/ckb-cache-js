@@ -3,7 +3,6 @@ import CKB from "@nervosnetwork/ckb-sdk-core";
 import BN from "bn.js";
 import CellRepository from "../database/cell-repository";
 import { Cell } from "../database/entity/cell";
-import { Rule } from "../database/entity/rule";
 import SyncService from "./sync";
 
 export class Query {
@@ -125,10 +124,6 @@ export class QueryBuilder {
 }
 
 export interface CacheService {
-  addRule(rule: Rule, beginBlockNumber: string | undefined): Promise<void>;
-
-  allRules(): Promise<Rule[]>;
-
   resetStartBlockNumber(blockNumber: string): void;
 
   findCells(query: Query): Promise<QueryResult>;
@@ -137,14 +132,6 @@ export interface CacheService {
 }
 
 export class NullCacheService implements CacheService {
-  public async addRule(_rule: Rule, _beginBlockNumber: string | undefined): Promise<void> {
-    return;
-  }
-
-  public async allRules(): Promise<Rule[]> {
-    return [];
-  }
-
   public resetStartBlockNumber(_blockNumber: string): void {
     return;
   }
@@ -169,18 +156,6 @@ export class DefaultCacheService implements CacheService {
 
   public async start() {
     this.syncService.start();
-  }
-
-  public async addRule(rule: Rule, beginBlockNumber: string | undefined): Promise<void> {
-    await this.syncService.addRule(rule);
-    if (beginBlockNumber) {
-      await this.syncService.resetStartBlockNumber(beginBlockNumber);
-    }
-    return;
-  }
-
-  public async allRules(): Promise<Rule[]> {
-    return this.syncService.allRules();
   }
 
   public async resetStartBlockNumber(blockNumber: string): Promise<void> {
