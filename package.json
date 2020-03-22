@@ -7,7 +7,8 @@
     "watch": "tsc -w",
     "clean": "rm -rf lib types",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "nnn": "ts-node src/test.ts"
   },
   "repository": "https://github.com/ququzone/ckb-cache-js",
   "keywords": [

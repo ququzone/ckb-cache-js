@@ -22,8 +22,9 @@ export default class SyncService {
   private currentBlock: BN;
   private currentBlockN: BN;
   private stopped = false;
+  private enableRule: boolean;
 
-  public constructor(ckb: CKB) {
+  public constructor(ckb: CKB, enableRule: boolean) {
     this.ckb = ckb;
     this.currentBlock = ZERO.clone();
     this.metadataRepository = new MetadataRepository();
@@ -35,6 +36,7 @@ export default class SyncService {
     this.rules.set("LockHash", []);
     this.rules.set("TypeCodeHash", []);
     this.rules.set("TypeHash", []);
+    this.enableRule = enableRule;
   }
 
   public getCurrentBlock(): BN {
@@ -46,6 +48,9 @@ export default class SyncService {
   }
 
   public async addRule(rule: Rule) {
+    if (!this.enableRule) {
+      throw new Error("startup by disable rule mode.");
+    }
     await this.ruleRepository.save(rule);
     const rules = this.rules.get(rule.name.toString());
     for (const r of rules) {
@@ -113,7 +118,7 @@ export default class SyncService {
               this.cellReposicory.updateUsed(
                 "pending_dead",
                 tx.hash,
-                this.currentBlock.toString(10),
+                this.currentBlock.toNumber(),
                 input.previousOutput.txHash,
                 input.previousOutput.index,
               );
@@ -122,7 +127,7 @@ export default class SyncService {
               const output = tx.outputs[i];
               if (this.checkCell(output)) {
                 const cell = new Cell();
-                cell.createdBlockNumber = this.currentBlock.toString(10);
+                cell.createdBlockNumber = this.currentBlock.toNumber();
                 cell.status = "pending";
                 cell.txHash = tx.hash;
                 cell.index = `0x${i.toString(16)}`;
@@ -201,6 +206,9 @@ export default class SyncService {
   }
 
   private checkCell(output: CKBComponents.CellOutput): boolean {
+    if (!this.enableRule) {
+      return true;
+    }
     const lockCodeHash = this.rules.get("LockCodeHash");
     for (const hash of lockCodeHash) {
       if (hash === output.lock.codeHash) {

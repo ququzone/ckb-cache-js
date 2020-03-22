@@ -16,7 +16,7 @@ export default class CellRepository {
     await this.repository.delete({id});
   }
 
-  public async updateUsed(status: string, txHash: string, blockNumber: string,
+  public async updateUsed(status: string, txHash: string, blockNumber: number,
                           previousTxHash: string, previousIndex: string) {
     await this.repository.update(
       {txHash: previousTxHash, index: previousIndex},

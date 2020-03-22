@@ -162,8 +162,8 @@ export class DefaultCacheService implements CacheService {
   private syncService: SyncService;
   private cellRepository: CellRepository;
 
-  public constructor(ckb: CKB) {
-    this.syncService = new SyncService(ckb);
+  public constructor(ckb: CKB, enableRule = false) {
+    this.syncService = new SyncService(ckb, enableRule);
     this.cellRepository = new CellRepository();
   }
 

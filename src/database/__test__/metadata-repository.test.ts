@@ -17,9 +17,9 @@ beforeAll(async () => {
        "src/database/subscriber/**/*.ts",
     ],
     cli: {
-       entitiesDir: "src/database/entity",
-       migrationsDir: "src/database/migration",
-       subscribersDir: "src/database/subscriber",
+      entitiesDir: "src/database/entity",
+      migrationsDir: "src/database/migration",
+      subscribersDir: "src/database/subscriber",
     },
   });
 });

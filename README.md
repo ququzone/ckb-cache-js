@@ -14,8 +14,8 @@ npm -i ckb-cache-js
 ### bootstrap
 
 ```
-const CKB = require("@nervosnetwork/ckb-sdk-core").default;
-const { DefaultCacheService, initConnection } = require("ckb-cache-js");
+import CKB from "@nervosnetwork/ckb-sdk-core";
+import { DefaultCacheService, initConnection } from "ckb-cache-js";
 
 let cache;
 const start = async (nodeUrl = "http://localhost:8114") => {
@@ -28,19 +28,33 @@ const start = async (nodeUrl = "http://localhost:8114") => {
       "node_modules/ckb-cache-js/lib/database/entity/*.js"
     ]
   });
+  const ckb = new CKB("");
+  const url = "http://localhost:8114";
+  const httpAgent = new http.Agent({ keepAlive: true });
+  ckb.setNode({ url, httpAgent });
 
-  const ckb = new CKB(nodeUrl);
-  cache = new DefaultCacheService(ckb);
+  // if enableRule = false then will cache all live cells,
+  // otherwise cache by user defined rules.
+  const enableRule = false;
+  cache = new DefaultCacheService(ckb, enableRule);
   cache.start();
 };
 start();
 ```
 
+### add rule
+
+Add cache rule for enable rule mode, in this mode the cache will only cache cells that meet user defined rules. By default cacher will cache all live cells.
+
+```
+await addRule({name: "LockHash": "0x6a242b57227484e904b4e08ba96f19a623c367dcbd18675ec6f2a71a0ff4ec26"}, "1000");
+```
+
 ### query
 
 ```
-const BN = require("bn.js");
-const { QueryBuilder } = require("ckb-cache-js");
+import BN from "bn.js";
+import { QueryBuilder } from "ckb-cache-js";
 
 // query by lockhash
 const allByLockhash = await cache.findCells(
