@@ -12,8 +12,12 @@ export default class CellRepository {
     }
   }
 
-  public async remove(id: number) {
+  public async remove(id: string) {
     await this.repository.delete({id});
+  }
+
+  public async removeBy(txHash: string, index: string) {
+    await this.repository.delete({txHash, index});
   }
 
   public async updateUsed(status: string, txHash: string, blockNumber: number,
@@ -24,7 +28,7 @@ export default class CellRepository {
     );
   }
 
-  public async updateStatus(id: number, oldStatus: string, newStatus: string) {
+  public async updateStatus(id: string, oldStatus: string, newStatus: string) {
     await this.repository.update(
       {id, status: oldStatus},
       {status: newStatus},

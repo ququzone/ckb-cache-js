@@ -98,14 +98,19 @@ export default class SyncService {
     while (!this.stopped) {
       let synced = false;
       try {
-        const header = await this.ckb.rpc.getTipHeader();
-        let headerNumber = new BN(header.number.slice(2), 16);
+        const headerHex = await this.ckb.rpc.getTipBlockNumber();
+        const tipNumber = new BN(headerHex.slice(2), 16);
+        let direct = false;
+        let headerNumber = new BN(headerHex.slice(2), 16);
         if (headerNumber.sub(BATCH_SIZE).gt(this.currentBlock)) {
           headerNumber = this.currentBlock.add(BATCH_SIZE);
         }
+        if (headerNumber.add(CONFIRM_SIZE).lt(tipNumber)) {
+          direct = true;
+        }
         // tslint:disable-next-line:no-console
         console.debug(`begin sync block at: ${this.currentBlock.toString(10)}`);
-        while (this.currentBlock.lte(headerNumber)) {
+        while (this.currentBlock.lt(headerNumber)) {
           if (this.currentBlockN) {
             this.currentBlock = this.currentBlockN;
             this.currentBlockN = null;
@@ -115,20 +120,28 @@ export default class SyncService {
           synced = true;
           block.transactions.forEach((tx) => {
             tx.inputs.forEach((input) => {
-              this.cellReposicory.updateUsed(
-                "pending_dead",
-                tx.hash,
-                this.currentBlock.toNumber(),
-                input.previousOutput.txHash,
-                input.previousOutput.index,
-              );
+              if (direct) {
+                this.cellReposicory.removeBy(input.previousOutput.txHash, input.previousOutput.index);
+              } else {
+                this.cellReposicory.updateUsed(
+                  "pending_dead",
+                  tx.hash,
+                  this.currentBlock.toNumber(),
+                  input.previousOutput.txHash,
+                  input.previousOutput.index,
+                );
+              }
             });
             for (let i = 0; i < tx.outputs.length; i++) {
               const output = tx.outputs[i];
               if (this.checkCell(output)) {
                 const cell = new Cell();
                 cell.createdBlockNumber = this.currentBlock.toNumber();
-                cell.status = "pending";
+                if (direct) {
+                  cell.status = "normal";
+                } else {
+                  cell.status = "pending";
+                }
                 cell.txHash = tx.hash;
                 cell.index = `0x${i.toString(16)}`;
                 cell.capacity = output.capacity;
@@ -156,7 +169,6 @@ export default class SyncService {
       } finally {
         if (synced) {
           // tslint:disable-next-line:no-console
-          console.debug(`sync block since: ${this.currentBlock.toString(10)}`);
           await this.metadataRepository.updateCurrentBlock(this.currentBlock.toString(10));
         } else {
           await this.yield(10000);
@@ -168,12 +180,12 @@ export default class SyncService {
   private async processFork() {
     while (!this.stopped) {
       try {
-        const header = await this.ckb.rpc.getTipHeader();
-        const headerNumber = new BN(header.number.slice(2), 16);
+        const headerHex = await this.ckb.rpc.getTipBlockNumber();
+        const headerNumber = new BN(headerHex.slice(2), 16);
 
         // process pending cells
         const pendingCells = await this.cellReposicory.findByStatus("pending");
-        pendingCells.forEach(async (cell) => {
+        for (const cell of pendingCells) {
           const tx = await this.ckb.rpc.getTransaction(cell.txHash);
           if (!tx) {
             await this.cellReposicory.remove(cell.id);
@@ -182,11 +194,11 @@ export default class SyncService {
           if (new BN(cell.createdBlockNumber).add(CONFIRM_SIZE).lte(headerNumber)) {
             await this.cellReposicory.updateStatus(cell.id, "pending", "normal");
           }
-        });
+        }
 
         // process pending dead cells
         const pendingDeadCells = await this.cellReposicory.findByStatus("pending_dead");
-        pendingDeadCells.forEach(async (cell) => {
+        for (const cell of pendingDeadCells) {
           const tx = await this.ckb.rpc.getTransaction(cell.usedTxHash);
           if (!tx) {
             await this.cellReposicory.updateStatus(cell.id, "pending_dead", "pending");
@@ -195,12 +207,12 @@ export default class SyncService {
           if (new BN(cell.usedBlockNumber).add(CONFIRM_SIZE).lte(headerNumber)) {
             await this.cellReposicory.remove(cell.id);
           }
-        });
+        }
       } catch (err) {
         // tslint:disable-next-line:no-console
         console.error("process fork data error:", err);
       } finally {
-        await this.yield(60000);
+        await this.yield(1000);
       }
     }
   }

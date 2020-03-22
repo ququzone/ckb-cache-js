@@ -4,7 +4,7 @@ import {Column, Entity, Index, PrimaryGeneratedColumn} from "typeorm";
 @Index(["txHash", "index"], { unique: true })
 export class Cell {
   @PrimaryGeneratedColumn("uuid")
-  public id: number;
+  public id: string;
 
   @Column({
     type: "character",
@@ -14,6 +14,7 @@ export class Cell {
   public txHash: string;
 
   @Column({
+    name: "tindex",
     type: "varchar",
     length: 5,
   })
